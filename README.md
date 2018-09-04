@@ -4,6 +4,18 @@
 
 ---
 
+* [FAQ](#frequently-asked-questions)
+  * [What!?](#what)
+  * [Does it implement curses API?](#does-it-implement-curses-api)
+  * [Hey! This doesn't behave the same way curses does!](#hey-this-doesnt-behave-the-same-way-curses-does)
+  * [Will you implement a feature for me?](#will-you-implement-a-feature-for-me)
+  * [Why won't you accept my pull request?](#why-wont-you-accept-my-pull-request)
+  * [I find your tone impolite.](#i-find-your-tone-impolite)
+* [Usage](#usage)
+* [LICENSE](#license)
+
+---
+
 ## Frequently Asked Questions
 
 ### What!?
@@ -57,6 +69,39 @@ I have found that my background and culture rubs American and Asian folks up the
 ---
 
 ## Usage
+
+```
+# Load the framework
+. damned
+
+# Access via the damned function...
+damned fg red
+echo 'This is red!'
+damned bg blue
+echo 'This is red text on a blue background!'
+sleep 2s
+damned clear screen
+damned term uncook
+damned echo disable
+key=$(damned getch)
+if [ "$key" = '119' ]; then
+  damned cursor up
+fi
+```
+
+Things you need to know:
+
+* ```damned``` does not parse the termcap file to see whether a method is available within your user's current terminal emulator. It will assume that if you call it, it can be done.
+* ```damned``` traps the EXIT signal with a cleanup helper, ```damned_cleanup```. If you override that trap, make sure you call it on exit.
+* ```damned``` traps the WINCH signal with the helper: ```damned_window_size```. If you override that trap, make sure you call it in your own signal handler.
+* ```damned_*``` is reserved by ```damned```.
+* ```damned``` is reserved by ```damned```.
+* ```dWIDTH``` is reserved by ```damned```.
+* ```dHEIGHT``` is reserved by ```damned```.
+* ```dCURSOR_HEIGHT``` is reserved by ```damned```.
+* ```dCURSOR_WIDTH``` is reserved by ```damned```.
+
+The exact functions and variables made available by the framework for the user is in the [API](API) document.
 
 ---
 

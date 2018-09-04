@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# TODO: urgent
+# Make it so our vars and functions are actually source-able (or a similar mechanism).
+
 dWIDTH=$(tput cols)
 dHEIGHT=$(tput lines)
 dCURSOR_HEIGHT=0 # Initialised elsewhere.
