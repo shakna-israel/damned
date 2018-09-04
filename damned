@@ -1,39 +1,36 @@
 #!/bin/sh
 
-damned_WIDTH=$(tput cols)
-damned_HEIGHT=$(tput lines)
-damned_CURSOR_HEIGHT=0 # Initialised elsewhere.
-damned_CURSOR_WIDTH=0 # Initialised elsewhere.
+dWIDTH=$(tput cols)
+dHEIGHT=$(tput lines)
+dCURSOR_HEIGHT=0 # Initialised elsewhere.
+dCURSOR_WIDTH=0 # Initialised elsewhere.
 damned_OLD_TTY=$(stty -g) # Store for restorations. Do NOT modify.
 
-# TODO: Reduce number of functions. Use arguments instead.
-# reduce to maybe even one exposed? That'd make macro-style expansion possible.
-# e.g. damned echo disable
-
-disable_echo() {
+damned_echo_disable() {
   stty -echo
 }
 
-enable_echo() {
+damned_echo_enable() {
   stty echo
 }
 
-term() {
-  case "$1" in
-    uncook) stty raw; break;;
-    restore) stty $damned_OLD_TTY; break;;
-  esac
+damned_term() {
+  if [ "$1" = 'uncook' ]; then
+    stty raw
+  elif [ "$1" = 'restore' ]; then
+    stty $damned_OLD_TTY
+  fi
   #TODO: Error checking
 }
 
-getch() {
+damned_getch() {
   # Read a single byte
   read -n 1 result
   # Convert the given byte into an ordinal.
   printf '%d' "'$result"
 }
 
-get_cursor_position() {
+damned_get_cursor_position() {
   exec < /dev/tty
   oldstty=$(stty -g)
   stty raw -echo min 0
@@ -47,23 +44,28 @@ get_cursor_position() {
   IFS=';' read -r row col
   stty $oldstty
 
-  damned_CURSOR_HEIGHT=$(expr $(expr substr $row 3 "$damned_WIDTH") - 1)
-  damned_CURSOR_WIDTH=$(expr ${col%R} - 1)
+  dCURSOR_HEIGHT=$(expr $(expr substr $row 3 "$dWIDTH") - 1)
+  dCURSOR_WIDTH=$(expr ${col%R} - 1)
 }
 
-cursor() {
-  case "$1" in
-    up) printf "\033[$2A"; break;;
-    down) printf "\033[$2B"; break;;
-    left) printf "\033[$2C"; break;;
-    right) printf "\033[$2D"; break;;
-    save) printf '\033[s'; break;;
-    restore) printf '\033[u'; break;;
-  esac
+damned_cursor() {
+  if [ "$1" = 'up' ]; then
+    printf "\033[$2A"
+  elif [ "$1" = 'down' ]; then
+    printf "\033[$2B"
+  elif [ "$1" = 'left' ]; then
+    printf "\033[$2C"
+  elif [ "$1" = 'right' ]; then
+    printf "\033[$2D"
+  elif [ "$1" = 'save' ]; then
+    printf '\033[s'
+  elif [ "$1" = 'restore' ]; then
+    printf '\033[u'
+  fi
   #TODO: Error on invalid choice?
 }
 
-line_clear() {
+damned_line_clear() {
   if [ -z "$1" ]; then
     printf '\033[2K'
   elif [ "$1" = 'before' ]; then
@@ -76,7 +78,7 @@ line_clear() {
   fi
 }
 
-screen_clear() {
+damned_screen_clear() {
   if [ -z "$1" ]; then
     printf '\033[2J'
   elif [ "$1" = 'before' ]; then
@@ -96,79 +98,150 @@ screen_clear() {
 # * Move cursor to column n
 # * bc for math
 
-colors() {
-  case "$1" in
-    # Decorations. Only sorta colors, but it makes sense.
-    bold) printf '\033[1m'; break;;
-    underline) printf '\033[4m'; break;;
-    reverse) printf '\033[7m'; break;;
-    blink) printf '\033[5m'; break;;
-    invisible) printf '\033[8m'; break;;
-    # Colors with differing behaviours
-    256) printf "\033[38;5;$2m"; break;;
-    true) printf "\033[38;2;$2;$3;$4m"; break;;
-    # Actual colors.
-    black) printf '\033[30m'; break;;
-    red) printf '\033[31m'; break;;
-    green) printf '\033[32m'; break;;
-    yellow) printf '\033[33m'; break;;
-    blue) printf '\033[34m'; break;;
-    magenta) printf '\033[35m'; break;;
-    cyan) printf '\033[36m'; break;;
-    white) printf '\033[37m'; break;;
-    bright-black) printf '\033[30;1m'; break;;
-    bright-red) printf '\033[31;1m'; break;;
-    bright-green) printf '\033[32;1m'; break;;
-    bright-yellow) printf '\033[33;1m'; break;;
-    bright-blue) printf '\033[34;1m'; break;;
-    bright-magenta) printf '\033[35;1m'; break;;
-    bright-cyan) printf '\033[36;1m'; break;;
-    bright-white) printf '\033[37;1m'; break;;
-    reset) printf '\033[m'; break;;
-  esac
+damned_text_effects() {
+	if [ "$1" = 'bold' ]; then
+		printf '\033[1m'
+	elif [ "$1" = 'underline' ]; then
+		printf '\033[4m'
+	elif [ "$1" = 'reverse' ]; then
+		printf '\033[7m'
+	elif [ "$1" = 'blink' ]; then
+		printf '\033[5m'
+	elif [ "$1" = 'invisible' ]; then
+		printf '\033[8m'
+	elif [ "$1" = 'reset' ]; then
+		printf '\033[m';
+	fi
+}
+
+damned_fg_color() {
+  if [ "$1" = '256' ]; then
+    printf "\033[38;5;$2m"
+  elif [ "$1" = 'true' ]; then
+    printf "\033[38;2;$2;$3;$4m"
+  elif [ "$1" = 'black' ]; then
+    printf '\033[30m'
+  elif [ "$1" = 'red' ]; then
+    printf '\033[31m'
+  elif [ "$1" = 'green' ]; then
+    printf '\033[32m'
+  elif [ "$1" = 'yellow' ]; then
+    printf '\033[33m'
+  elif [ "$1" = 'blue' ]; then
+    printf '\033[34m'
+  elif [ "$1" = 'magenta' ]; then
+    printf '\033[35m'
+  elif [ "$1" = 'cyan' ]; then
+    printf '\033[36m'
+  elif [ "$1" = 'white' ]; then
+    printf '\033[37m'
+  elif [ "$1" = 'bright-black']; then
+    printf '\033[30;1m'
+  elif [ "$1" = 'bright-red' ]; then
+    printf '\033[31;1m'
+  elif [ "$1" = 'bright-green' ]; then
+    printf '\033[32;1m'
+  elif [ "$1" = 'bright-yellow' ]; then
+    printf '\033[33;1m'
+  elif [ "$1" = 'bright-blue' ]; then
+    printf '\033[34;1m'
+  elif [ "$1" = 'bright-magenta' ]; then
+    printf '\033[35;1m'
+  elif [ "$1" = 'bright-cyan' ]; then
+    printf '\033[36;1m'
+  elif [ "$1" = 'bright-white' ]; then
+    printf '\033[37;1m'
+  fi
   #TODO: maybe error on invalid input.
 }
 
-colors_bg() {
-  case "$1" in
-    # colors with differing behaviours
-    256) printf "\033[48;5;$2m"; break;;
-    true) printf "\033[48;2;$2;$3;$4m"; break;;
-    # normal colors
-    black) printf '\033[40m'; break;;
-    red) printf '\033[41m'; break;;
-    green) printf '\033[42m'; break;;
-    yellow) printf '\033[43m'; break;;
-    blue) printf '\033[44m'; break;;
-    magenta) printf '\033[45m'; break;;
-    cyan) printf '\033[46m'; break;;
-    white) printf '\033[47m'; break;;
-    bright-black) printf '\033[40;1m'; break;;
-    bright-red) printf '\033[41;1m'; break;;
-    bright-green) printf '\033[42;1m'; break;;
-    bright-yellow) printf '\033[43;1m'; break;;
-    bright-blue) printf '\033[44;1m'; break;;
-    bright-magenta) printf '\033[45;1m'; break;;
-    bright-cyan) printf '\033[46;1m'; break;;
-    bright-white) printf '\033[47;1m'; break;;
-  esac
+damned_bg_color() {
+  if [ "$1" = '256' ]; then
+    printf "\033[48;5;$2m"
+  elif [ "$1" = 'true' ]; then
+    printf "\033[48;2;$2;$3;$4m"
+  elif [ "$1" = 'black' ]; then
+    printf '\033[40m'
+  elif [ "$1" = 'red' ]; then
+    printf '\033[41m'
+  elif [ "$1" = 'green' ]; then
+    printf '\033[42m'
+  elif [ "$1" = 'yellow' ]; then
+    printf '\033[43m'
+  elif [ "$1" = 'blue' ]; then
+    printf '\033[44m'
+  elif [ "$1" = 'magenta' ]; then
+    printf '\033[45m'
+  elif [ "$1" = 'cyan' ]; then
+    printf '\033[46m'
+  elif [ "$1" = 'white' ]; then
+    printf '\033[47m'
+  elif [ "$1" = 'bright-black' ]; then
+    printf '\033[40;1m'
+  elif [ "$1" = 'bright-red' ]; then
+    printf '\033[41;1m'
+  elif [ "$1" = 'bright-green' ]; then
+    printf '\033[42;1m'
+  elif [ "$1" = 'bright-yellow' ]; then
+    printf '\033[43;1m'
+  elif [ "$1" = 'bright-blue' ]; then
+    printf '\033[44;1m'
+  elif [ "$1" = 'bright-magenta' ]; then
+    printf '\033[45;1m'
+  elif [ "$1" = 'bright-cyan' ]; then
+    printf '\033[46;1m'
+  elif [ "$1" = 'bright-white' ]; then
+    printf '\033[47;1m'
+  fi
   #TODO: maybe error on invalid input.
 }
 
-trap 'window_size' WINCH
-window_size() {
-  damned_WIDTH=$(tput cols)
-  damned_HEIGHT=$(tput lines)
-  # `get_cursor_position` can be costly to run.
-  get_cursor_position
+trap 'damned_window_size' WINCH
+damned_window_size() {
+  dWIDTH=$(tput cols)
+  dHEIGHT=$(tput lines)
+  # `damned_get_cursor_position` can be costly to run.
+  damned_get_cursor_position
 }
 
-trap 'cleanup' EXIT
-cleanup() {
+trap 'damned_cleanup' EXIT
+damned_cleanup() {
   stty $damned_OLD_TTY
-  colors reset
+  damned_text_effects reset
+}
+
+damned() {
+  if [ "$1" = 'echo' ]; then
+    if [ "$2" = 'disable' ]; then
+      damned_echo_disable
+    elif [ "$2" = 'enable' ]; then
+      damned_echo_enable
+    fi
+  elif [ "$1" = 'term' ]; then
+  	damned_term "$2"
+  elif [ "$1" = 'getch' ]; then
+  	damned_getch
+  elif [ "$1" = 'cursor' ]; then
+  	if [ "$2" = 'refresh' ]; then
+  		damned_get_cursor_position
+  	else
+  		damned_cursor "$2"
+  	fi
+  elif [ "$1" = 'clear' ]; then
+  	if [ "$2" = 'line' ]; then
+  		damned_line_clear "$3"
+  	elif [ "$2" = 'screen' ]; then
+  		damned_screen_clear "$3"
+  	fi
+  elif [ "$1" = 'effect' ]; then
+  	damned_text_effects "$2"
+  elif [ "$1" = 'fg' ]; then
+  	damned_fg_color "$2" "$3" "$4" "$5"
+  elif [ "$1" = 'bg' ]; then
+  	damned_bg_color "$2" "$3" "$4" "$5"
+  fi
 }
 
 # This needs to run at least once!
 # And yes, it takes forever to run.
-get_cursor_position
+damned_get_cursor_position
