@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# TODO: urgent
-# Make it so our vars and functions are actually source-able (or a similar mechanism).
+damned_version='1.0.0'
 
 dWIDTH=$(tput cols)
 dHEIGHT=$(tput lines)

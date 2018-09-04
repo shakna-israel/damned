@@ -8,6 +8,8 @@ Breaking changes, where this document and the functioning of ```damned``` change
 
 ## Essential Information
 
+```damned_version``` supplies a version string, of ```MAJOR.MINOR.PATCH```.
+
 ```damned``` does not parse the termcap file to see whether a method is available within your user's current terminal emulator. It will assume that if you call it, it can be done.
 
 ```damned``` traps the EXIT signal with a cleanup helper, ```damned_cleanup```. If you override that trap, make sure you call it on exit.
