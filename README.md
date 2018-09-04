@@ -71,8 +71,8 @@ I have found that my background and culture rubs American and Asian folks up the
 ## Usage
 
 ```
-# Load the framework
-. damned
+# Load the framework, assuming it is in the same folder
+. ./damned
 
 # Access via the damned function...
 damned fg red
@@ -101,7 +101,7 @@ Things you need to know:
 * ```dCURSOR_HEIGHT``` is reserved by ```damned```.
 * ```dCURSOR_WIDTH``` is reserved by ```damned```.
 
-The exact functions and variables made available by the framework for the user is in the [API](API) document.
+The exact functions and variables made available by the framework for the user is in the [API.md](API.md) document.
 
 ---
 
