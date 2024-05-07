@@ -99,8 +99,8 @@ fi
 Things you need to know:
 
 * ```damned``` does not parse the termcap file to see whether a method is available within your user's current terminal emulator. It will assume that if you call it, it can be done.
-* ```damned``` traps the EXIT signal with a cleanup helper, ```damned_cleanup```. If you override that trap, make sure you call it on exit.
-* ```damned``` traps the WINCH signal with the helper: ```damned_window_size```. If you override that trap, make sure you call it in your own signal handler.
+* ```damned``` traps the `EXIT` signal with a cleanup helper, ```damned_cleanup```. If you override that trap, make sure you call it on exit.
+* ```damned``` traps the `WINCH` signal with the helper: ```damned_window_size```. If you override that trap, make sure you call it in your own signal handler.
 * ```damned_*``` is reserved by ```damned```.
 * ```damned``` is reserved by ```damned```.
 
