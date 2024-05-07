@@ -1,96 +1,144 @@
-#!/bin/sh
+#!/bin/bash
 
-damned_version='1.0.0'
+damned_version='2.0.0';
 
-dWIDTH=$(tput cols)
-dHEIGHT=$(tput lines)
-dCURSOR_HEIGHT=0 # Initialised elsewhere.
-dCURSOR_WIDTH=0 # Initialised elsewhere.
-damned_OLD_TTY=$(stty -g) # Store for restorations. Do NOT modify.
+damned_WIDTH="$(tput cols)";
+damned_HEIGHT="$(tput lines)";
+damned_CURSOR_HEIGHT=0; # Initialised elsewhere.
+damned_CURSOR_WIDTH=0; # Initialised elsewhere.
+damned_OLD_TTY="$(stty -g)"; # Store for restorations. Do NOT modify.
 
 damned_echo_disable() {
-  stty -echo
+  if ! stty -echo; then
+    false;
+    return;
+  else
+    true;
+    return;
+  fi
 }
 
 damned_echo_enable() {
-  stty echo
+  if ! stty echo; then
+    false;
+    return;
+  else
+    true;
+    return;
+  fi
 }
 
 damned_term() {
   if [ "$1" = 'uncook' ]; then
-    stty raw
+    if ! stty raw; then
+      false;
+      return;
+    else
+      true;
+      return;
+    fi
   elif [ "$1" = 'restore' ]; then
-    stty $damned_OLD_TTY
+    if ! stty "$damned_OLD_TTY"; then
+      false;
+      return;
+    else
+      true;
+      return;
+    fi
   fi
-  #TODO: Error checking
 }
 
 damned_getch() {
   # Read a single byte
-  read -n 1 result
+  read -n 1 result;
+  if [ -z "$result" ]; then
+    false;
+    return;
+  fi
   # Convert the given byte into an ordinal.
-  printf '%d' "'$result"
+  printf '%d' "'$result";
+  true;
+  return;
 }
 
 damned_get_cursor_position() {
-  exec < /dev/tty
-  oldstty=$(stty -g)
-  stty raw -echo min 0
-  tput u7 > /dev/tty
+  exec < /dev/tty;
+  if [ "$?" -ne 0 ]; then
+    false;
+    return;
+  fi
+  oldstty="$(stty -g)";
+  stty raw -echo min 0;
+  if [ "$?" -ne 0 ]; then
+    false;
+    return;
+  fi
+  tput u7 > /dev/tty;
+  if [ "$?" -ne 0 ]; then
+    false;
+    return;
+  fi
 
   # Yeah. Really.
   # Apparently `read` can run before output is given.
   # 200ms was the smallest value I could find that would consistently work.
-  sleep 0.2
+  sleep 0.2;
 
   IFS=';' read -r row col
-  stty $oldstty
+  stty "$oldstty";
+  if [ "$?" -ne 0 ]; then
+    false;
+    return;
+  fi
 
-  dCURSOR_HEIGHT=$(expr $(expr substr $row 3 "$dWIDTH") - 1)
-  dCURSOR_WIDTH=$(expr ${col%R} - 1)
+  damned_CURSOR_HEIGHT="$(expr "$(expr substr "$row" 3 "$damned_WIDTH")" - 1)";
+  damned_CURSOR_WIDTH="$(expr "${col%R}" - 1)";
+  true;
+  return;
 }
 
 damned_cursor() {
   if [ "$1" = 'up' ]; then
-    printf "\033[$2A"
+    printf "\033[$2A";
   elif [ "$1" = 'down' ]; then
-    printf "\033[$2B"
+    printf "\033[$2B";
   elif [ "$1" = 'left' ]; then
-    printf "\033[$2C"
+    printf "\033[$2C";
   elif [ "$1" = 'right' ]; then
-    printf "\033[$2D"
+    printf "\033[$2D";
   elif [ "$1" = 'save' ]; then
-    printf '\033[s'
+    printf '\033[s';
   elif [ "$1" = 'restore' ]; then
-    printf '\033[u'
+    printf '\033[u';
+  else
+    printf '\033[u';
   fi
-  #TODO: Error on invalid choice?
+  true;
+  return;
 }
 
 damned_line_clear() {
-  if [ -z "$1" ]; then
-    printf '\033[2K'
-  elif [ "$1" = 'before' ]; then
-    printf '\033[1K'
+  if [ "$1" = 'before' ]; then
+    printf '\033[1K';
   elif [ "$1" = 'after' ]; then
-    printf '\033[0K'
+    printf '\033[0K';
   else
-    #TODO: Raise an exception? Maybe?
-    :
+    printf '\033[2K';
   fi
+  true;
+  return;
 }
 
 damned_screen_clear() {
-  if [ -z "$1" ]; then
-    printf '\033[2J'
-  elif [ "$1" = 'before' ]; then
-    printf '\033[1J'
+  if [ "$1" = 'before' ]; then
+    printf '\033[1J';
   elif [ "$1" = 'after' ]; then
-    printf '\033[0J'
+    printf '\033[0J';
   else
-    #TODO: Raise an exception? Maybe?
-    :
+    printf '\033[2J';
   fi
+  true;
+  return;
 }
 
 # TODO: cursor_goto
@@ -102,148 +150,173 @@ damned_screen_clear() {
 
 damned_text_effects() {
 	if [ "$1" = 'bold' ]; then
-		printf '\033[1m'
+		printf '\033[1m';
 	elif [ "$1" = 'underline' ]; then
-		printf '\033[4m'
+		printf '\033[4m';
 	elif [ "$1" = 'reverse' ]; then
-		printf '\033[7m'
+		printf '\033[7m';
 	elif [ "$1" = 'blink' ]; then
-		printf '\033[5m'
+		printf '\033[5m';
 	elif [ "$1" = 'invisible' ]; then
-		printf '\033[8m'
+		printf '\033[8m';
 	elif [ "$1" = 'reset' ]; then
 		printf '\033[m';
+  else
+    printf '\033[m';
 	fi
+  true;
+  return;
 }
 
 damned_fg_color() {
   if [ "$1" = '256' ]; then
-    printf "\033[38;5;$2m"
+    printf "\033[38;5;$2m";
   elif [ "$1" = 'true' ]; then
-    printf "\033[38;2;$2;$3;$4m"
+    printf "\033[38;2;$2;$3;$4m";
   elif [ "$1" = 'black' ]; then
-    printf '\033[30m'
+    printf '\033[30m';
   elif [ "$1" = 'red' ]; then
-    printf '\033[31m'
+    printf '\033[31m';
   elif [ "$1" = 'green' ]; then
-    printf '\033[32m'
+    printf '\033[32m';
   elif [ "$1" = 'yellow' ]; then
-    printf '\033[33m'
+    printf '\033[33m';
   elif [ "$1" = 'blue' ]; then
-    printf '\033[34m'
+    printf '\033[34m';
   elif [ "$1" = 'magenta' ]; then
-    printf '\033[35m'
+    printf '\033[35m';
   elif [ "$1" = 'cyan' ]; then
-    printf '\033[36m'
+    printf '\033[36m';
   elif [ "$1" = 'white' ]; then
-    printf '\033[37m'
-  elif [ "$1" = 'bright-black']; then
-    printf '\033[30;1m'
+    printf '\033[37m';
+  elif [ "$1" = 'bright-black' ]; then
+    printf '\033[30;1m';
   elif [ "$1" = 'bright-red' ]; then
-    printf '\033[31;1m'
+    printf '\033[31;1m';
   elif [ "$1" = 'bright-green' ]; then
-    printf '\033[32;1m'
+    printf '\033[32;1m';
   elif [ "$1" = 'bright-yellow' ]; then
-    printf '\033[33;1m'
+    printf '\033[33;1m';
   elif [ "$1" = 'bright-blue' ]; then
-    printf '\033[34;1m'
+    printf '\033[34;1m';
   elif [ "$1" = 'bright-magenta' ]; then
-    printf '\033[35;1m'
+    printf '\033[35;1m';
   elif [ "$1" = 'bright-cyan' ]; then
-    printf '\033[36;1m'
+    printf '\033[36;1m';
   elif [ "$1" = 'bright-white' ]; then
-    printf '\033[37;1m'
+    printf '\033[37;1m';
+  else
+    printf '\033[m';
   fi
-  #TODO: maybe error on invalid input.
+  true;
+  return;
 }
 
 damned_bg_color() {
   if [ "$1" = '256' ]; then
-    printf "\033[48;5;$2m"
+    printf "\033[48;5;$2m";
   elif [ "$1" = 'true' ]; then
-    printf "\033[48;2;$2;$3;$4m"
+    printf "\033[48;2;$2;$3;$4m";
   elif [ "$1" = 'black' ]; then
-    printf '\033[40m'
+    printf '\033[40m';
   elif [ "$1" = 'red' ]; then
-    printf '\033[41m'
+    printf '\033[41m';
   elif [ "$1" = 'green' ]; then
-    printf '\033[42m'
+    printf '\033[42m';
   elif [ "$1" = 'yellow' ]; then
-    printf '\033[43m'
+    printf '\033[43m';
   elif [ "$1" = 'blue' ]; then
-    printf '\033[44m'
+    printf '\033[44m';
   elif [ "$1" = 'magenta' ]; then
-    printf '\033[45m'
+    printf '\033[45m';
   elif [ "$1" = 'cyan' ]; then
-    printf '\033[46m'
+    printf '\033[46m';
   elif [ "$1" = 'white' ]; then
-    printf '\033[47m'
+    printf '\033[47m';
   elif [ "$1" = 'bright-black' ]; then
-    printf '\033[40;1m'
+    printf '\033[40;1m';
   elif [ "$1" = 'bright-red' ]; then
-    printf '\033[41;1m'
+    printf '\033[41;1m';
   elif [ "$1" = 'bright-green' ]; then
-    printf '\033[42;1m'
+    printf '\033[42;1m';
   elif [ "$1" = 'bright-yellow' ]; then
-    printf '\033[43;1m'
+    printf '\033[43;1m';
   elif [ "$1" = 'bright-blue' ]; then
-    printf '\033[44;1m'
+    printf '\033[44;1m';
   elif [ "$1" = 'bright-magenta' ]; then
-    printf '\033[45;1m'
+    printf '\033[45;1m';
   elif [ "$1" = 'bright-cyan' ]; then
-    printf '\033[46;1m'
+    printf '\033[46;1m';
   elif [ "$1" = 'bright-white' ]; then
-    printf '\033[47;1m'
+    printf '\033[47;1m';
+  else
+    printf '\033[m';
   fi
-  #TODO: maybe error on invalid input.
+  true;
+  return;
 }
 
 trap 'damned_window_size' WINCH
 damned_window_size() {
-  dWIDTH=$(tput cols)
-  dHEIGHT=$(tput lines)
+  damned_WIDTH="$(tput cols)";
+  damned_HEIGHT="$(tput lines)";
   # `damned_get_cursor_position` can be costly to run.
-  damned_get_cursor_position
+  damned_get_cursor_position;
+  true;
+  return;
 }
 
 trap 'damned_cleanup' EXIT
 damned_cleanup() {
-  stty $damned_OLD_TTY
-  damned_text_effects reset
+  stty "$damned_OLD_TTY";
+  damned_text_effects reset;
+  true;
+  return;
 }
 
 damned() {
   if [ "$1" = 'echo' ]; then
     if [ "$2" = 'disable' ]; then
-      damned_echo_disable
+      damned_echo_disable;
+      return;
     elif [ "$2" = 'enable' ]; then
-      damned_echo_enable
+      damned_echo_enable;
+      return;
     fi
   elif [ "$1" = 'term' ]; then
-  	damned_term "$2"
+  	damned_term "$2";
+    return;
   elif [ "$1" = 'getch' ]; then
-  	damned_getch
+  	damned_getch;
+    return;
   elif [ "$1" = 'cursor' ]; then
   	if [ "$2" = 'refresh' ]; then
-  		damned_get_cursor_position
+  		damned_get_cursor_position;
+      return;
   	else
-  		damned_cursor "$2"
+  		damned_cursor "$2";
+      return;
   	fi
   elif [ "$1" = 'clear' ]; then
   	if [ "$2" = 'line' ]; then
-  		damned_line_clear "$3"
+  		damned_line_clear "$3";
+      return;
   	elif [ "$2" = 'screen' ]; then
-  		damned_screen_clear "$3"
+  		damned_screen_clear "$3";
+      return;
   	fi
   elif [ "$1" = 'effect' ]; then
-  	damned_text_effects "$2"
+  	damned_text_effects "$2";
+    return;
   elif [ "$1" = 'fg' ]; then
-  	damned_fg_color "$2" "$3" "$4" "$5"
+  	damned_fg_color "$2" "$3" "$4" "$5";
+    return;
   elif [ "$1" = 'bg' ]; then
-  	damned_bg_color "$2" "$3" "$4" "$5"
+  	damned_bg_color "$2" "$3" "$4" "$5";
+    return;
   fi
 }
 
 # This needs to run at least once!
 # And yes, it takes forever to run.
-damned_get_cursor_position
+damned_get_cursor_position;

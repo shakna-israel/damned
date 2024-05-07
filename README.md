@@ -5,6 +5,7 @@
 ---
 
 * [FAQ](#frequently-asked-questions)
+  * [Shell...?](#shell)
   * [What!?](#what)
   * [Does it implement curses API?](#does-it-implement-curses-api)
   * [Hey! This doesn't behave the same way curses does!](#hey-this-doesnt-behave-the-same-way-curses-does)
@@ -17,6 +18,12 @@
 ---
 
 ## Frequently Asked Questions
+
+### Shell...?
+
+Unfortunately, this requires a few bash-isms. I'd like to get rid of them, but at the moment, it does require something that implements the Bash interface, such as bash, zsh, etc.
+
+Dash and others won't work.
 
 ### What!?
 
@@ -96,10 +103,6 @@ Things you need to know:
 * ```damned``` traps the WINCH signal with the helper: ```damned_window_size```. If you override that trap, make sure you call it in your own signal handler.
 * ```damned_*``` is reserved by ```damned```.
 * ```damned``` is reserved by ```damned```.
-* ```dWIDTH``` is reserved by ```damned```.
-* ```dHEIGHT``` is reserved by ```damned```.
-* ```dCURSOR_HEIGHT``` is reserved by ```damned```.
-* ```dCURSOR_WIDTH``` is reserved by ```damned```.
 
 The exact functions and variables made available by the framework for the user is in the [API.md](API.md) document.
 

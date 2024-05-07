@@ -21,39 +21,39 @@ Breaking changes, where this document and the functioning of ```damned``` change
 
 ```damned``` is reserved by ```damned```.
 
-```dWIDTH``` is reserved by ```damned```.
+Upon loading, ```damned``` runs ```damned_get_cursor_position```, as a necessary step. This *will* cause a short lag time.
 
-```dHEIGHT``` is reserved by ```damned```.
-
-```dCURSOR_HEIGHT``` is reserved by ```damned```.
-
-```dCURSOR_WIDTH``` is reserved by ```damned```.
+Every function does have a return value, this will be equivalent to `false` if some system call has failed.
 
 ---
 
-## dWIDTH
+## damned_WIDTH
 
-This is a variable, that can be accessed and read by the user. (e.g. ```test "$dWIDTH" = '27';```)
+This is a variable, that can be accessed and read by the user. (e.g. ```test "$damned_WIDTH" = '27';```)
 
 It should reflect the current number of characters wide that the terminal is.
 
 If a user changes this variable, it invokes undefined behaviour.
 
+See also [damned cursor](#damned-cursor)
+
 ---
 
-## dHEIGHT
+## damned_HEIGHT
 
-This is a variable, that can be accessed and read by the user. (e.g. ```test "$dHEIGHT" = '27';```)
+This is a variable, that can be accessed and read by the user. (e.g. ```test "$damned_HEIGHT" = '27';```)
 
 It should reflect the current number of characters high that the terminal is, also known as the number of lines.
 
 If a user changes this variable, it invokes undefined behaviour.
 
+See also [damned cursor](#damned-cursor)
+
 ---
 
-## dCURSOR_WIDTH
+## damned_CURSOR_WIDTH
 
-This is a variable, that can be accessed and read by the user. (e.g. ```test "$dCURSOR_WIDTH" = '27';```)
+This is a variable, that can be accessed and read by the user. (e.g. ```test "$damned_CURSOR_WIDTH" = '27';```)
 
 It should reflect the current number of characters across that the cursor currently is, or the line position of the cursor.
 
@@ -62,9 +62,9 @@ If a user changes this variable, it invokes undefined behaviour.
 
 ---
 
-## dCURSOR_HEIGHT
+## damned_CURSOR_HEIGHT
 
-This is a variable, that can be accessed and read by the user. (e.g. ```test "$dCURSOR_HEIGHT" = '27';```)
+This is a variable, that can be accessed and read by the user. (e.g. ```test "$damned_CURSOR_HEIGHT" = '27';```)
 
 It should reflect the current number of characters high that the cursor currently is, or the line number that the cursor is on.
 
@@ -92,7 +92,7 @@ It attempts to update the above variables to the correct values.
 
 This is the main function, that it is expected you will use.
 
-As it takes a sequence of arguments, you can supply them using variables, if you decide to structure your program that way.
+As it takes a sequence of arguments. (You can supply them using variables, if you decide to structure your program that way.)
 
 ### damned echo
 
@@ -114,7 +114,7 @@ Note: There is *no* ```cook```. Full restoration of the terminal is your only op
 
 ```damned cursor``` allows you to interact with the user's cursor on the terminal.
 
-* ```damned cursor refresh``` will update the ```dCURSOR_HEIGHT``` and ```dCURSOR_WIDTH``` values. This is not done automatically, because it is an expensive operation of at least 200ms, which involves redirecting the tty temporarily.
+* ```damned cursor refresh``` will update the ```damned_CURSOR_HEIGHT``` and ```damned_CURSOR_WIDTH``` values. This is not done automatically, because it is an expensive operation of at least 200ms, which involves redirecting the tty temporarily.
 * ```damned cursor up``` Moves the user's cursor up one line. Behaviour is undefined if the cursor is at the limit.
 * ```damned cursor down``` Moves the user's cursor down one line. Behaviour is undefined if the cursor is at the limit.
 * ```damned cursor left``` Moves the user's cursor to the left one character. Behaviour is undefined if the cursor is at the limit.
@@ -166,6 +166,7 @@ Note: There is *no* ```cook```. Full restoration of the terminal is your only op
 * ```damned fg bright-magenta``` sets the text to magenta colouring.
 * ```damned fg bright-cyan``` sets the text to cyan colouring.
 * ```damned fg bright-white``` sets the text to white colouring.
+* ```damned fg``` is the same as running ```damned effect reset```.
 
 ## damned bg
 
@@ -189,3 +190,4 @@ Note: There is *no* ```cook```. Full restoration of the terminal is your only op
 * ```damned bg bright-magenta``` sets the background to magenta colouring.
 * ```damned bg bright-cyan``` sets the background to cyan colouring.
 * ```damned bg bright-white``` sets the background to white colouring.
+* ```damned bg``` is the same as running ```damned effect reset```.
