@@ -56,7 +56,7 @@ damned_getch() {
     return;
   fi
   # Convert the given byte into an ordinal.
-  printf '%d' "'$result";
+  >&2 printf '%d' "'$result";
   true;
   return;
 }
@@ -99,19 +99,19 @@ damned_get_cursor_position() {
 
 damned_cursor() {
   if [ "$1" = 'up' ]; then
-    printf "\033[$2A";
+    >&2 printf "\033[$2A";
   elif [ "$1" = 'down' ]; then
-    printf "\033[$2B";
+    >&2 printf "\033[$2B";
   elif [ "$1" = 'left' ]; then
-    printf "\033[$2C";
+    >&2 printf "\033[$2C";
   elif [ "$1" = 'right' ]; then
-    printf "\033[$2D";
+    >&2 printf "\033[$2D";
   elif [ "$1" = 'save' ]; then
-    printf '\033[s';
+    >&2 printf '\033[s';
   elif [ "$1" = 'restore' ]; then
-    printf '\033[u';
+    >&2 printf '\033[u';
   else
-    printf '\033[u';
+    >&2 printf '\033[u';
   fi
   true;
   return;
@@ -119,11 +119,11 @@ damned_cursor() {
 
 damned_line_clear() {
   if [ "$1" = 'before' ]; then
-    printf '\033[1K';
+    >&2 printf '\033[1K';
   elif [ "$1" = 'after' ]; then
-    printf '\033[0K';
+    >&2 printf '\033[0K';
   else
-    printf '\033[2K';
+    >&2 printf '\033[2K';
   fi
   true;
   return;
@@ -131,11 +131,11 @@ damned_line_clear() {
 
 damned_screen_clear() {
   if [ "$1" = 'before' ]; then
-    printf '\033[1J';
+    >&2 printf '\033[1J';
   elif [ "$1" = 'after' ]; then
-    printf '\033[0J';
+    >&2 printf '\033[0J';
   else
-    printf '\033[2J';
+    >&2 printf '\033[2J';
   fi
   true;
   return;
@@ -150,19 +150,19 @@ damned_screen_clear() {
 
 damned_text_effects() {
 	if [ "$1" = 'bold' ]; then
-		printf '\033[1m';
+		>&2 printf '\033[1m';
 	elif [ "$1" = 'underline' ]; then
-		printf '\033[4m';
+		>&2 printf '\033[4m';
 	elif [ "$1" = 'reverse' ]; then
-		printf '\033[7m';
+		>&2 printf '\033[7m';
 	elif [ "$1" = 'blink' ]; then
-		printf '\033[5m';
+		>&2 printf '\033[5m';
 	elif [ "$1" = 'invisible' ]; then
-		printf '\033[8m';
+		>&2 printf '\033[8m';
 	elif [ "$1" = 'reset' ]; then
-		printf '\033[m';
+		>&2 printf '\033[m';
   else
-    printf '\033[m';
+    >&2 printf '\033[m';
 	fi
   true;
   return;
@@ -170,43 +170,43 @@ damned_text_effects() {
 
 damned_fg_color() {
   if [ "$1" = '256' ]; then
-    printf "\033[38;5;$2m";
+    >&2 printf "\033[38;5;$2m";
   elif [ "$1" = 'true' ]; then
-    printf "\033[38;2;$2;$3;$4m";
+    >&2 printf "\033[38;2;$2;$3;$4m";
   elif [ "$1" = 'black' ]; then
-    printf '\033[30m';
+    >&2 printf '\033[30m';
   elif [ "$1" = 'red' ]; then
-    printf '\033[31m';
+    >&2 printf '\033[31m';
   elif [ "$1" = 'green' ]; then
-    printf '\033[32m';
+    >&2 printf '\033[32m';
   elif [ "$1" = 'yellow' ]; then
-    printf '\033[33m';
+    >&2 printf '\033[33m';
   elif [ "$1" = 'blue' ]; then
-    printf '\033[34m';
+    >&2 printf '\033[34m';
   elif [ "$1" = 'magenta' ]; then
-    printf '\033[35m';
+    >&2 printf '\033[35m';
   elif [ "$1" = 'cyan' ]; then
-    printf '\033[36m';
+    >&2 printf '\033[36m';
   elif [ "$1" = 'white' ]; then
-    printf '\033[37m';
+    >&2 printf '\033[37m';
   elif [ "$1" = 'bright-black' ]; then
-    printf '\033[30;1m';
+    >&2 printf '\033[30;1m';
   elif [ "$1" = 'bright-red' ]; then
-    printf '\033[31;1m';
+    >&2 printf '\033[31;1m';
   elif [ "$1" = 'bright-green' ]; then
-    printf '\033[32;1m';
+    >&2 printf '\033[32;1m';
   elif [ "$1" = 'bright-yellow' ]; then
-    printf '\033[33;1m';
+    >&2 printf '\033[33;1m';
   elif [ "$1" = 'bright-blue' ]; then
-    printf '\033[34;1m';
+    >&2 printf '\033[34;1m';
   elif [ "$1" = 'bright-magenta' ]; then
-    printf '\033[35;1m';
+    >&2 printf '\033[35;1m';
   elif [ "$1" = 'bright-cyan' ]; then
-    printf '\033[36;1m';
+    >&2 printf '\033[36;1m';
   elif [ "$1" = 'bright-white' ]; then
-    printf '\033[37;1m';
+    >&2 printf '\033[37;1m';
   else
-    printf '\033[m';
+    >&2 printf '\033[m';
   fi
   true;
   return;
@@ -214,43 +214,43 @@ damned_fg_color() {
 
 damned_bg_color() {
   if [ "$1" = '256' ]; then
-    printf "\033[48;5;$2m";
+    >&2 printf "\033[48;5;$2m";
   elif [ "$1" = 'true' ]; then
-    printf "\033[48;2;$2;$3;$4m";
+    >&2 printf "\033[48;2;$2;$3;$4m";
   elif [ "$1" = 'black' ]; then
-    printf '\033[40m';
+    >&2 printf '\033[40m';
   elif [ "$1" = 'red' ]; then
-    printf '\033[41m';
+    >&2 printf '\033[41m';
   elif [ "$1" = 'green' ]; then
-    printf '\033[42m';
+    >&2 printf '\033[42m';
   elif [ "$1" = 'yellow' ]; then
-    printf '\033[43m';
+    >&2 printf '\033[43m';
   elif [ "$1" = 'blue' ]; then
-    printf '\033[44m';
+    >&2 printf '\033[44m';
   elif [ "$1" = 'magenta' ]; then
-    printf '\033[45m';
+    >&2 printf '\033[45m';
   elif [ "$1" = 'cyan' ]; then
-    printf '\033[46m';
+    >&2 printf '\033[46m';
   elif [ "$1" = 'white' ]; then
-    printf '\033[47m';
+    >&2 printf '\033[47m';
   elif [ "$1" = 'bright-black' ]; then
-    printf '\033[40;1m';
+    >&2 printf '\033[40;1m';
   elif [ "$1" = 'bright-red' ]; then
-    printf '\033[41;1m';
+    >&2 printf '\033[41;1m';
   elif [ "$1" = 'bright-green' ]; then
-    printf '\033[42;1m';
+    >&2 printf '\033[42;1m';
   elif [ "$1" = 'bright-yellow' ]; then
-    printf '\033[43;1m';
+    >&2 printf '\033[43;1m';
   elif [ "$1" = 'bright-blue' ]; then
-    printf '\033[44;1m';
+    >&2 printf '\033[44;1m';
   elif [ "$1" = 'bright-magenta' ]; then
-    printf '\033[45;1m';
+    >&2 printf '\033[45;1m';
   elif [ "$1" = 'bright-cyan' ]; then
-    printf '\033[46;1m';
+    >&2 printf '\033[46;1m';
   elif [ "$1" = 'bright-white' ]; then
-    printf '\033[47;1m';
+    >&2 printf '\033[47;1m';
   else
-    printf '\033[m';
+    >&2 printf '\033[m';
   fi
   true;
   return;
